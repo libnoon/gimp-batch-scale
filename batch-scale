@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+
+usage () {
+    echo "batch-scale [OPTION...] INPUTFILE OUTPUTFILE"
+    echo "Read the INPUTFILE image, scale it to fit in a square,"
+    echo "and write the result into OUTPUTFILE."
+    echo " Options:"
+    echo "   -s PIXELS  Size of the square's side, in pixels."
+    echo "              e.g. 640, 800, 1024 (default: 800)"
+    echo "   -h         Show this help."
+}
+
+scale () {
+    gimp -ib '(batch-scale '"$1"' "'"$2"'" "'"$3"'") (gimp-quit 0)'
+}
+
+pixels=800
+
+while getopts hs: opt
+do
+    case "$opt" in
+	s)
+	    pixels="$OPTARG"
+	    ;;
+	h)
+	    usage
+	    exit 0
+	    ;;
+	'?')
+	    exit 1
+	    ;;
+	*)
+	    echo "unhandled option {$opt}" 1>&2
+	    exit 1
+	    ;;
+    esac
+done
+shift "`expr $OPTIND - 1`"
+
+# There should be two arguments left: INPUTFILE OUTPUTFILE.
+if [ "$#" -lt 2 ]
+then
+    echo "missing argument" 1>&2
+    exit 1
+elif [ "$#" -gt 2 ]
+then
+    echo "too many arguments" 1>&2
+    exit 1
+fi
+
+input="$1"
+output="$2"
+
+scale "$pixels" "$input" "$output"
